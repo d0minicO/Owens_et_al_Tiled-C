@@ -1,0 +1,26 @@
+sampleName	total
+CD41_P1-CTCF-KO_combined	18238495.999944
+CD41_P2-CTCF-KO_combined	20752901.000114
+CD41_WT_combined	16549435.000119999
+Flk1_P1-CTCF-KO_combined	17235612.000461
+Flk1_P2-CTCF-KO_combined	13469998.000135
+Flk1_WT_combined	15882498.999935
+Un_P1-CTCF-KO_combined	11143367.999938
+Un_P2-CTCF-KO_combined	8311409.999857
+Un_WT_combined	10103063.999829
+
+
+Total Usable Reporters: 131686783 
+
+# A tibble: 1 x 2
+       mean       sd
+      <dbl>    <dbl>
+14631865. 4130273.
+
+
+# mean contacts per bin across all samples
+mean(contacts)
+1       6604.109
+
+  sd(contacts)
+1      3910.25
