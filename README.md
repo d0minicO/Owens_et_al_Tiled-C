@@ -3,7 +3,7 @@ Instructions and custom scripts for anlaysis of Tiled-C data in our biorXiv pape
 
 https://www.biorxiv.org/content/10.1101/2021.05.14.444178v1
 
-any questions should be directed to dominic.owens@utoronto.ca
+Any questions should be directed to dominic.owens@utoronto.ca
 
 
 ## Analysis part 1
@@ -20,41 +20,42 @@ Please see this link for additional details: https://github.com/oudelaar/TiledC
 
 **DISCLAIMER: The following R scripts are separated into sections with a description of what each one performs. The author developed this collection of scripts to meet his research team's specific data analysis needs and makes NO CLAIMS to their constituting a complete R package that will accept different inputs and reproducibly give a desired output across operating systems. These scripts are being shared in the spirit of open science to facilitate reproduction of the analysis done in our paper. These scripts could also serve as a useful starting point for user's own analysis. Inputs should be checked carefully as they may differ depending on your situation (eg number of samples, naming of samples, directory structures etc.) The outputs of each step MUST be checked to make sure they are being produced in a desired / expected format.**
 
-#### Check and plot reporter numbers in each individual sample and merged samples
+#### 1. Check and plot reporter numbers in each individual sample and merged samples
 
  - 1_TileR_replicateAnalysis_ReporterNumbers_200322
  - 1-2_TileR_2kb_raw_contactNumPerBaitPerSample_200404
  - 1-3_TileR_2kb_raw_contactNumPerBaitPerSample_merged_200404 *(to determine and plot reporter numbers PER BAIT in each individual sample and merged samples)*
 
 
-#### Performing clustering of individual samples and perform statistical testing (DESeq2) between genotypes and between cell types
+#### 2. Performing clustering of individual samples and perform statistical testing (DESeq2) between genotypes and between cell types
 
  - 2_TileR_replicateAnalysis_DESeq_diffIntFrags_nonIced_matrices_v2_200324
  - 2-2_TileR_replicateAnalysis_DESeq_diffIntFrags_nonIced_matrices_justWT_200324
 *(to plot PCA and heatmap of just WT samples)*
 
 
-#### Extract normalised matrices for iced individual replicates to plot in python
+#### 3. Extract normalised matrices for iced individual replicates to plot in python
 
  - 3_TileR_replicateAnalysis_iced_normMatrices_200327
 
-#### Virtual Capture-C plots from viewpoints as specified in “baitsRightIDs.txt”
+#### 4. Virtual Capture-C plots from viewpoints as specified in “baitsRightIDs.txt”
 
  - 4_TileR_2kb_iced_200331
 *(bedGraph tracks outputted as hubs, including the replicate information as a SD (light colour above the track in UCSC))*
 
 *Once individual replicates seem okay (clustering was okay and low sd on virtual CapC plots) then MERGE sam files into one sam file for each biological genotype/tissue like this*
-`samtools merge mergedOutput.sam in1.sam in2.sam in3.sam` 
+
+```samtools merge mergedOutput.sam in1.sam in2.sam in3.sam```
 
 *Then follow the above Ice normalisation procedue as describe in* **Part 1** *to get a single ICE normalised matrix for each genotype/tissue*
 
 
-#### Calculate and plot reporter numbers in merged samples
+#### 5. Calculate and plot reporter numbers in merged samples
 
  - 5_TileR_replicateAnalysis_ReporterNumbers_merged_libs_200322 *(Input is merged and ICE normalised matrices)*
 
 
-#### Normalising merged replicate matrices and subtracting to allow comparison between genotypes and cell types
+#### 6. Normalising merged replicate matrices and subtracting to allow comparison between genotypes and cell types
 
  - 6_TileR_subtractionAndSubsetR_DESeq_filt_200322
 
@@ -67,31 +68,31 @@ Please see this link for additional details: https://github.com/oudelaar/TiledC
 -- DESeq2 differential bins over whole tiled window
 -- DESeq2 differential bins over smaller specified window
 
-#### Calculate total contacts from P1 and P2 promoters 
+#### 7. Calculate total contacts from P1 and P2 promoters 
 
- - 8_totalPromContacts_2kb_iced_scaled_200422
+ - 7_totalPromContacts_2kb_iced_scaled_200422
 
 *Input is iced and scaled matrices*
 
 
-#### Calculate contacts from P1 and P2 promoters to enhancers, and from enhancers to enhancers
+#### 8. Calculate contacts from P1 and P2 promoters to enhancers, and from enhancers to enhancers
 
- - 9_enhPromContacts_2kb_iced_scaled_2004239_enhPromContacts_2kb_iced_scaled_200423
- - 9_enhEnhContacts_2kb_iced_scaled_200815
-
-
-#### Calculate contacts from P1 and P2 promoters to CTCF sites
-
- - 10_ctcfPromContacts_2kb_iced_scaled_200424
+ - 8-2_enhPromContacts_2kb_iced_scaled_2004239_enhPromContacts_2kb_iced_scaled_200423
+ - 8_enhEnhContacts_2kb_iced_scaled_200815
 
 
-#### Calculate TAD insulation scores
+#### 9. Calculate contacts from P1 and P2 promoters to CTCF sites
 
- - 11_TAD_insScore_2kb_iced_scaled_201020
+ - 9_ctcfPromContacts_2kb_iced_scaled_200424
 
-#### Calculate contacts between CTCF sites
 
- - 12_ctcfCTCFContacts_2kb_iced_scaled_201117
+#### 10. Calculate TAD insulation scores
+
+ - 10_TAD_insScore_2kb_iced_scaled_201020
+
+#### 11. Calculate contacts between CTCF sites
+
+ - 11_ctcfCTCFContacts_2kb_iced_scaled_201117
 
 
 
