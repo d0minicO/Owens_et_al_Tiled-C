@@ -3,7 +3,7 @@ Instructions and custom scripts for anlaysis of Tiled-C data in our biorXiv pape
 
 https://www.biorxiv.org/content/10.1101/2021.05.14.444178v1
 
-Any questions should be directed to dominic.owens@utoronto.ca
+Details are available in the methods section of the paper. Any questions that arise should be directed to dominic.owens@utoronto.ca
 
 
 ## Analysis part 1
@@ -16,6 +16,9 @@ This uses the Hi-CPro pipeline (Servant et al. Genome Biol 2015; https://github.
 Please see this link for additional details: https://github.com/oudelaar/TiledC
 
 ## Analysis part 2
+
+Raw matrix data and quality control plots are included in this github submission. Raw sequencing data has been uploaded to GEO. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE184490
+
 *R code by Dominic Owens*:
 
 **DISCLAIMER: The following R scripts are separated into sections with a description of what each one performs. The author developed this collection of scripts to meet his research team's specific data analysis needs and makes NO CLAIMS to their constituting a complete R package that will accept different inputs and reproducibly give a desired output across operating systems. These scripts are being shared in the spirit of open science and to facilitate reproduction of the analyses done in our paper. These scripts could also serve as a useful starting point for user's own analysis. Inputs should be checked carefully as they may differ depending on your situation (eg number of samples, naming of samples, directory structures etc.) The outputs of each step MUST be checked to make sure they are being produced in a desired / expected format.**
