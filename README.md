@@ -75,10 +75,9 @@ Please see this link for additional details: https://github.com/oudelaar/TiledC
 *Input is iced and scaled matrices*
 
 
-#### 8. Calculate contacts from P1 and P2 promoters to enhancers, and from enhancers to enhancers
+#### 8. Calculate contacts from P1 and P2 promoters to enhancers
 
- - 8-2_enhPromContacts_2kb_iced_scaled_2004239_enhPromContacts_2kb_iced_scaled_200423
- - 8_enhEnhContacts_2kb_iced_scaled_200815
+ - 8_enhPromContacts_2kb_iced_scaled_200423
 
 
 #### 9. Calculate contacts from P1 and P2 promoters to CTCF sites
