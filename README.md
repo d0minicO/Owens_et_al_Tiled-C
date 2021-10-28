@@ -17,7 +17,7 @@ Please see this link for additional details: https://github.com/oudelaar/TiledC
 
 ## Analysis part 2
 
-Raw matrix data and quality control plots are included in this github submission. Raw sequencing data has been uploaded to GEO. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE184490
+Raw matrix data and quality control plots and statistics are included in this github submission. Raw sequencing data has been uploaded to GEO. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE184490
 
 *R code by Dominic Owens*:
 
