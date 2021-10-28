@@ -352,7 +352,6 @@ for (tad in tadData$tad_name){
 
 ### save the variable for next time
 #saveRDS(object = total_df, file=paste0(variablesFolder, "_insulationScores_indiBaits.rds"))
-## will there be a next time? Y or N ??????????? LOL, Y
 
 
 ### load previous step data
