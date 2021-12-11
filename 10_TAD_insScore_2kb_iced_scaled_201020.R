@@ -337,17 +337,12 @@ for (tad in tadData$tad_name){
   full_df = full_df[complete.cases(full_df),]
   
   
-
+  
   ## and join with the total df
   total_df=rbind(full_df,total_df)
   
   
 } # end of for TAD loop
-
-
-
-
-
 
 
 ### save the variable for next time
@@ -422,9 +417,9 @@ shapiro.test(sample(total_df$Ratio,5000))
 
 ## WILD TYPE SAMPLES ACROSS DIFFERENTIATION MAIN TAD ONLY
 
-## I know beforehadn that I am only interested in WT samples now,
+## I know a priori that I am only interested in WT samples now,
 # and main TAD
-# so it is okay to do stat test on this smaller subset of the data
+# so do stat test on this smaller subset of the data
 # adjusted p values will be given in the Dunn multiple comparisons test
 
 ## WT only & P1 only
@@ -459,9 +454,9 @@ write.table(ph1,
 
 ## WILD TYPE SAMPLES ACROSS DIFFERENTIATION sub TADs ONLY
 
-## I know beforehadn that I am only interested in WT samples now,
+## I know a priori that I am only interested in WT samples now,
 # and sub TADs
-# so it is okay to do stat test on this smaller subset of the data
+# so do stat test on this smaller subset of the data
 # adjusted p values will be given in the Dunn multiple comparisons test
 # but as I will be testing the sub-TADs separately, I will combine the two KW tests
 # and readjust the pvalues
@@ -481,9 +476,9 @@ for (tad in tads){
   
   t1_out %<>%
     mutate(test_group=tad)
-
+  
   tests_out= rbind.data.frame(tests_out,t1_out)
-
+  
 } # end for tad loop
 
 
@@ -556,8 +551,8 @@ write.table(phs,
 
 ## ALL GENOTYPES ACROSS DIFFERENTIATION ALL TADs
 
-## I know beforehadn that I am only interested in CD41 samples now
-# so it is okay to do stat test on this smaller subset of the data
+## I know a priori that I am only interested in CD41 samples now
+# so do stat test on this smaller subset of the data
 # adjusted p values will be given in the Dunn multiple comparisons test
 # but as I will be testing the sub-TADs separately, I will combine the KW tests
 # and readjust the pvalues
@@ -675,31 +670,32 @@ temp %>%
   summarise(median(Ratio))
 
 
-# get a variable for the ylimits
-lims=c((median(temp$Ratio)-.05),(median(temp$Ratio)+.05))
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$Ratio)$stats
+
+lims = c(stat[1],stat[5])
+
 
 
 p=
   ggplot(data=temp, aes(x = tissue, y = Ratio, fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = Ratio),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
   coord_cartesian(ylim = lims)+
-  #facet_wrap(~promName)+
   scale_fill_manual(values=c("#7570b3ff", "#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 ggsave(p, 
        filename = paste0(plotFolder, "Un_Mes_WT_mainTAD_median_IQR.pdf"),
-       width=2,
+       width=1.85,
        height=1)
+
 
 
 
@@ -713,7 +709,7 @@ temp =
   filter(genotype=="WT" & (tissue=="Flk1" | tissue=="CD41") & tad_name=="main_TAD")
 
 # get a variable for the ylimits
-lims=c((median(temp$Ratio)-.03),(median(temp$Ratio)+.03))
+lims=c((min(temp$Ratio)-.03),(max(temp$Ratio)+.0003))
 
 
 # check the filtering work a I had some issues
@@ -727,26 +723,33 @@ temp %>%
   summarise(median(Ratio))
 
 
+
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$Ratio)$stats
+
+lims = c(stat[1],stat[5])
+
+
+
+
+
 p=
   ggplot(data=temp, aes(x = tissue, y = Ratio, fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = Ratio),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
   coord_cartesian(ylim = lims)+
-  #facet_wrap(~promName)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 ggsave(p, 
        filename = paste0(plotFolder, "Mes_CD41_WT_mainTAD_median_IQR.pdf"),
-       width=1.9,
+       width=1.8,
        height=.8)
 
 
@@ -762,7 +765,7 @@ temp =
   filter(genotype=="WT" & (tissue=="Flk1" | tissue=="CD41") & tad_name!="main_TAD")
 
 # get a variable for the ylimits
-lims=c((median(temp$Ratio)-.07),(median(temp$Ratio)+.1))
+lims=c((min(temp$Ratio)-.03),(max(temp$Ratio)+.01))
 
 
 # check the filtering work a I had some issues
@@ -776,29 +779,32 @@ temp %>%
   summarise(median(Ratio))
 
 
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$Ratio)$stats
+
+lims = c(stat[1],stat[5])
+
+
+
 p=
   ggplot(data=temp, aes(x = tissue, y = Ratio, fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = Ratio),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
   coord_cartesian(ylim = lims)+
   facet_wrap(~tad_name)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 ggsave(p, 
        filename = paste0(plotFolder, "Mes_CD41_WT_subTADs_median_IQR.pdf"),
-       width=2.6,
+       width=2.1,
        height=1.25)
-
-
 
 
 
@@ -806,61 +812,10 @@ ggsave(p,
 
 ### PLOT 4 ###
 
-# WT all cell types just sub TADs
-
-temp = 
-  total_df %>%
-  filter(genotype=="WT" & tad_name!="main_TAD")
-
-# get a variable for the ylimits
-lims=c((median(temp$Ratio)-.07),(median(temp$Ratio)+.1))
-
-
-# check the filtering work a I had some issues
-levels(factor(temp$tissue))
-levels(factor(temp$genotype))
-levels(factor(temp$tad_name))
-
-#check what the median values will be
-temp %>%
-  group_by(tissue,tad_name) %>%
-  summarise(median(Ratio))
-
-
-p=
-  ggplot(data=temp, aes(x = tissue, y = Ratio, fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = Ratio),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
-  coord_cartesian(ylim = lims)+
-  facet_wrap(~tad_name)+
-  scale_fill_manual(values=c("#7570b3ff", "#d95f02ff", "#1b9e77ff"))+
-  theme_bw()+
-  theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
-
-ggsave(p, 
-       filename = paste0(plotFolder, "Un_Mes_CD41_WT_subTADs_median_IQR.pdf"),
-       width=3,
-       height=1.25)
-
-
-
-
-
-
-
-### PLOT 5 ###
-
 # just CD41 all TADs
 
 
-## plotting in for loop as I need different lims for each one
+## plotting in for loop as I want different lims for each one
 tads = c("main_TAD", "P1-P2_TAD", "P2-3'UTR_TAD")
 
 for (tad in tads){
@@ -869,37 +824,54 @@ for (tad in tads){
     total_df %>%
     filter(tissue=="CD41" & tad_name==!!tad)
   
-  # get a variable for the ylimits
-  lims=c((median(temp$Ratio)-.05),(median(temp$Ratio)+.05))
+  ## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+  # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+  stat = boxplot.stats(temp$Ratio)$stats
+  
+  lims = c(stat[1],stat[5])
+  
+  
+  
+  ## put genotypes in a logical order
+  temp$genotype = factor(temp$genotype, levels=c("WT","P1.CTCF.KO","P2.CTCF.KO"))
   
   
   # check the filtering work a I had some issues
   levels(factor(temp$tissue))
   levels(factor(temp$genotype))
   levels(factor(temp$tad_name))
-
+  
+  
+  ## need different alpha values for geom_point depending which plot we're doing
+  ## as there are far more bins within the main_TAD so need a lower alpha value compared to sub-TADs
+  # which have fewer values
+  if(tad=="main_TAD"){
+    aval = 0.1
+  } else if(tad=="P1-P2_TAD" | tad=="P2-3'UTR_TAD"){
+    aval = 0.3
+  }
+  
   
   
   p=
     ggplot(data=temp, aes(x = genotype, y = Ratio, fill=genotype))+
-    stat_summary(geom="bar",
-                 fun = median)+
-    stat_summary(geom="uperrorbar",
-                 mapping = aes(x = genotype, y = Ratio),
-                 fun.min = iqr_low,
-                 fun.max = iqr_hi,
-                 fun = median,
-                 width=.3)+
+    geom_boxplot(size=.1,outlier.shape = NA)+
     coord_cartesian(ylim = lims)+
     facet_grid(~tad_name, scales="free")+
     scale_fill_manual(values=c("#666666ff", "#66a61eff", "#e7298aff"))+
     theme_bw()+
     theme(axis.text.x=element_blank(),
-          strip.background =element_rect(fill="white"))
+          strip.background =element_rect(fill="white",size=.1),
+          strip.text = element_text(size=7),
+          axis.text = element_text(size=6),
+          axis.ticks = element_line(size=.1),
+          axis.ticks.x = element_blank(),
+          panel.grid = element_blank(),
+          panel.border = element_rect(colour = "black", fill=NA, size=.1))
   
   ggsave(p, 
          filename = paste0(plotFolder, "CD41_allGenos_", tad, "_median_IQR.pdf"),
-         width=3,
-         height=1.5)
+         width=2.4,
+         height=1.3)
   
 }

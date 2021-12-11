@@ -343,10 +343,10 @@ sum_EP_contacts <-
 
 # set p adjustment method
 # c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY",
-  #   "fdr", "none")
+#   "fdr", "none")
 
 meth="holm"
-  
+
 
 ## first need to test for normality to decide whether to use parametric or non-parametric tests
 
@@ -518,7 +518,7 @@ for (prom in proms){
       filter(tissue==!!tiss)
     
     for (enhancer in enhancers){
-    
+      
       temp3 =
         temp2 %>%
         filter(enhName==!!enhancer)
@@ -580,54 +580,68 @@ temp =
   totals %>%
   filter(genotype=="WT" & (tissue=="Un" | tissue=="Flk1"))
 
+
+
+
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$contacts)$stats
+
+lims = c(stat[1],stat[5])
+
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts,fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = contacts),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
+  coord_cartesian(ylim = lims)+
   facet_wrap(~promName)+
   scale_fill_manual(values=c("#7570b3ff", "#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 ggsave(p, 
        filename = paste0(outFolder, "Un_Mes_WT_median_IQR.pdf"),
-       width=2.25,
+       width=2.2,
        height=1.25)
 
 
-## E-P interactions split by promoter for Un and Mes
+## E-P interactions split by promoter for Mes and CD41
 
 temp = 
   totals %>%
   filter(genotype=="WT" & (tissue=="Flk1" | tissue=="CD41"))
 
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$contacts)$stats
+
+lims = c(stat[1],stat[5])
+
+
+
+
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts,fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = contacts),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
+  coord_cartesian(ylim = lims)+
   facet_wrap(~promName)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 
 ggsave(p, 
        filename = paste0(outFolder, "Mes_CD41_WT_median_IQR.pdf"),
-       width=2.5,
+       width=2.1,
        height=1.25)
 
 
@@ -635,29 +649,36 @@ ggsave(p,
 ## total E-P interactions split by promoter for all tissues and genotypes
 temp = 
   totals# %>%
-  #filter(tissue=="Flk1" | tissue=="CD41")
+#filter(tissue=="Flk1" | tissue=="CD41")
+
+
+
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$contacts)$stats
+
+lims = c(stat[1],stat[5])
+
 
 p=
   ggplot(data=temp, aes(x = genotype, y = contacts, fill=genotype))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = genotype, y = contacts),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
+  coord_cartesian(ylim = lims)+
   facet_wrap(promName~tissue, ncol=6)+
   scale_fill_manual(values=c("#666666ff", "#66a61eff", "#e7298aff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 
 ggsave(p, 
        filename = paste0(outFolder, "allTissues_allGenotypes_median_IQR.pdf"),
-       width=7.5,
-       height=1.75)
+       width=6,
+       height=1.6)
 
 
 
@@ -667,18 +688,27 @@ p=
   ggplot(data=totals, aes(x = genotype, y = contacts, fill=genotype))+
   stat_summary(geom="bar",
                fun = median)+
+  geom_point(alpha=1,size=.3)+
   stat_summary(geom="uperrorbar",
                mapping = aes(x = genotype, y = contacts),
                fun.min = iqr_low,
                fun.max = iqr_hi,
                fun = median,
-               width=.3)+
+               width=.3,
+               size=.1)+
   facet_wrap(promName~tissue+enh_numName, scales="free", ncol=13)+
   scale_fill_manual(values=c("#666666ff", "#66a61eff", "#e7298aff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
         strip.background =element_rect(fill="white"),
-        strip.text.x = element_text(size = 6))
+        strip.text.x = element_text(size = 6),
+        axis.text = element_text(size=6))+
+  theme(axis.text.x=element_blank(),
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 
 ggsave(p, 

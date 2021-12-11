@@ -279,12 +279,12 @@ for (i in 1:nrow(ctcfData_new)){ # for ctcf loop
     filter(baitID==ctcfID | preyID==ctcfID) %>%
     mutate(ctcfName=ctcfName)
   
-
+  
   # filter this matrix on all other CTCF sites
   ctcf_filt2 =
     ctcf_filt %>%
     filter(baitID %in% ctcfData_new$ctcfID & preyID %in% ctcfData_new$ctcfID)
- 
+  
   
   # combine to totals df
   totals=rbind.data.frame(totals,ctcf_filt2)
@@ -418,33 +418,40 @@ temp %>%
   summarise(median(contacts))
 
 
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$contacts)$stats
+
+lims = c(stat[1],stat[5])
+
+
+
 
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts, fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = contacts),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
+  coord_cartesian(ylim = lims)+
   scale_fill_manual(values=c("#7570b3ff", "#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
+
 
 ggsave(p, 
        filename = paste0(outFolder, "Un_Mes_WT_CTCF-TAD-boundaries_median_IQR.pdf"),
-       width=1.9,
+       width=1.7,
        height=1)
 
 
 
 
-### PLOT 1 ###
+### PLOT 2 ###
 
-# WT just Un and Mes MAIN TAD ONLY
+# WT just MES and HPC MAIN TAD ONLY
 
 temp = 
   totals %>%
@@ -461,24 +468,31 @@ temp %>%
   summarise(median(contacts))
 
 
+
+## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
+# values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
+stat = boxplot.stats(temp$contacts)$stats
+
+lims = c(stat[1],stat[5])
+
+
+
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts, fill=tissue))+
-  stat_summary(geom="bar",
-               fun = median)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = tissue, y = contacts),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3)+
+  geom_boxplot(size=.1,outlier.shape = NA)+
+  coord_cartesian(ylim = lims)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"))
+        strip.background =element_rect(fill="white",size=.1),
+        axis.ticks = element_line(size=.1),
+        axis.ticks.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=.1))
 
 ggsave(p, 
        filename = paste0(outFolder, "Mes_HPC_WT_CTCF-TAD-boundaries_median_IQR.pdf"),
-       width=1.8,
+       width=1.7,
        height=.8)
 
 
