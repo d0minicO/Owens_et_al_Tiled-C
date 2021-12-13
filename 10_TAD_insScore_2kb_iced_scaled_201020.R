@@ -7,7 +7,7 @@ library(magrittr)
 library(RColorBrewer)
 library(broom)
 library(plotrix)
-
+library(patchwork)
 
 library(FSA)
 library(ggpubr)
@@ -22,8 +22,8 @@ library(ggpubr)
 
 
 
-# working 17 11 2020
-
+# created 17 11 2020
+# last updated 12 12 2021
 
 ###############
 ### OPTIONS ###
@@ -56,6 +56,14 @@ head_tail <- function(x,description){
         rep("",ncol(x))) %>%
     tibble
   
+}
+
+
+
+## function from https://stackoverflow.com/questions/15720545/use-stat-summary-to-annotate-plot-with-number-of-observations
+## to add text of number of data points ontop of a boxplot 
+n_fun <- function(x){
+  return(data.frame(y = median(x), label = paste0(length(x))))
 }
 
 ##############
@@ -674,13 +682,14 @@ temp %>%
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
 stat = boxplot.stats(temp$Ratio)$stats
 
-lims = c(stat[1],stat[5])
+lims = c(stat[1],stat[5]*1.02)
 
 
 
 p=
   ggplot(data=temp, aes(x = tissue, y = Ratio, fill=tissue))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-.5,aes(y=stat[5]))+
   coord_cartesian(ylim = lims)+
   scale_fill_manual(values=c("#7570b3ff", "#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
@@ -708,9 +717,6 @@ temp =
   total_df %>%
   filter(genotype=="WT" & (tissue=="Flk1" | tissue=="CD41") & tad_name=="main_TAD")
 
-# get a variable for the ylimits
-lims=c((min(temp$Ratio)-.03),(max(temp$Ratio)+.0003))
-
 
 # check the filtering work a I had some issues
 levels(factor(temp$tissue))
@@ -726,9 +732,33 @@ temp %>%
 
 ## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
-stat = boxplot.stats(temp$Ratio)$stats
+## needs to be done for each group in this case as upper whisker was being cut off when performing boxpot.stats on all data
+## need some starting points that are off the scale big and small to allow them to be updated by the real data!!
+lwr=1e10
+upr=0
 
-lims = c(stat[1],stat[5])
+tissues = levels(factor(temp$tissue))
+
+for(tiss in tissues){
+
+  temp2 =
+    temp %>%
+    filter(tissue==!!tiss)
+  
+  
+  stat = boxplot.stats(temp2$Ratio)$stats
+  
+  lwr_tmp = stat[1]
+  upr_tmp = stat[5]
+  
+  ## update these values in the loop if smaller or bigger
+  if(lwr_tmp<lwr){lwr=lwr_tmp}
+  if(upr_tmp>upr){upr=upr_tmp}
+      
+}
+
+
+lims=c(lwr,upr*1.02)
 
 
 
@@ -737,6 +767,7 @@ lims = c(stat[1],stat[5])
 p=
   ggplot(data=temp, aes(x = tissue, y = Ratio, fill=tissue))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-.5,aes(y=upr))+
   coord_cartesian(ylim = lims)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
@@ -749,8 +780,8 @@ p=
 
 ggsave(p, 
        filename = paste0(plotFolder, "Mes_CD41_WT_mainTAD_median_IQR.pdf"),
-       width=1.8,
-       height=.8)
+       width=1.85,
+       height=1)
 
 
 
@@ -783,13 +814,14 @@ temp %>%
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
 stat = boxplot.stats(temp$Ratio)$stats
 
-lims = c(stat[1],stat[5])
+lims = c(stat[1],stat[5]*1.04)
 
 
 
 p=
   ggplot(data=temp, aes(x = tissue, y = Ratio, fill=tissue))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-.3,aes(y=stat[5]))+
   coord_cartesian(ylim = lims)+
   facet_wrap(~tad_name)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
@@ -803,7 +835,7 @@ p=
 
 ggsave(p, 
        filename = paste0(plotFolder, "Mes_CD41_WT_subTADs_median_IQR.pdf"),
-       width=2.1,
+       width=2.2,
        height=1.25)
 
 
@@ -812,7 +844,7 @@ ggsave(p,
 
 ### PLOT 4 ###
 
-# just CD41 all TADs
+# just CD41 all TADs across genotypes
 
 
 ## plotting in for loop as I want different lims for each one
@@ -826,9 +858,34 @@ for (tad in tads){
   
   ## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
   # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
-  stat = boxplot.stats(temp$Ratio)$stats
+  ## needs to be done for each group in this case as upper whisker was being cut off when performing boxpot.stats on all data
+  ## need some starting points that are off the scale big and small to allow them to be updated by the real data!!
+  lwr=1e10
+  upr=0
   
-  lims = c(stat[1],stat[5])
+  genos = levels(factor(temp$genotype))
+  
+  for(g in genos){
+    
+    temp2 =
+      temp %>%
+      filter(genotype==!!g)
+    
+    
+    stat = boxplot.stats(temp2$Ratio)$stats
+    
+    lwr_tmp = stat[1]
+    upr_tmp = stat[5]
+    
+    ## update these values in the loop if smaller or bigger
+    if(lwr_tmp<lwr){lwr=lwr_tmp}
+    if(upr_tmp>upr){upr=upr_tmp}
+    
+  }
+  
+  
+  lims=c(lwr,upr*1.02)
+  
   
   
   
@@ -841,24 +898,16 @@ for (tad in tads){
   levels(factor(temp$genotype))
   levels(factor(temp$tad_name))
   
-  
-  ## need different alpha values for geom_point depending which plot we're doing
-  ## as there are far more bins within the main_TAD so need a lower alpha value compared to sub-TADs
-  # which have fewer values
-  if(tad=="main_TAD"){
-    aval = 0.1
-  } else if(tad=="P1-P2_TAD" | tad=="P2-3'UTR_TAD"){
-    aval = 0.3
-  }
-  
-  
-  
-  p=
+
+  p=  
     ggplot(data=temp, aes(x = genotype, y = Ratio, fill=genotype))+
     geom_boxplot(size=.1,outlier.shape = NA)+
+    stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-.4,aes(y=upr))+
     coord_cartesian(ylim = lims)+
     facet_grid(~tad_name, scales="free")+
     scale_fill_manual(values=c("#666666ff", "#66a61eff", "#e7298aff"))+
+    ylab(NULL)+
+    xlab(NULL)+
     theme_bw()+
     theme(axis.text.x=element_blank(),
           strip.background =element_rect(fill="white",size=.1),
@@ -870,8 +919,11 @@ for (tad in tads){
           panel.border = element_rect(colour = "black", fill=NA, size=.1))
   
   ggsave(p, 
-         filename = paste0(plotFolder, "CD41_allGenos_", tad, "_median_IQR.pdf"),
-         width=2.4,
-         height=1.3)
+         filename = paste0(plotFolder, "CD41_allGenos_",tad,"_boxplot_median_IQR.pdf"),
+         width=2.3,
+         height=1.2)
+  
   
 }
+
+

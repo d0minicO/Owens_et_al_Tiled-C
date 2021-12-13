@@ -5,6 +5,7 @@ library(tools)
 library(cowplot)
 library(magrittr)
 library(RColorBrewer)
+library(patchwork)
 
 
 library(FSA)
@@ -17,6 +18,7 @@ library(ggpubr)
 
 
 # working 16 11 2020
+# last updated 12 12 2021
 
 
 ###############
@@ -51,6 +53,13 @@ head_tail <- function(x,description){
         rep("",ncol(x))) %>%
     tibble
   
+}
+
+
+## function from https://stackoverflow.com/questions/15720545/use-stat-summary-to-annotate-plot-with-number-of-observations
+## to add text of number of data points ontop of a boxplot 
+n_fun <- function(x){
+  return(data.frame(y = median(x), label = paste0(length(x))))
 }
 
 
@@ -581,17 +590,40 @@ temp =
   filter(genotype=="WT" & (tissue=="Un" | tissue=="Flk1"))
 
 
-
-
 ## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
-stat = boxplot.stats(temp$contacts)$stats
+## needs to be done for each group in this case as upper whisker was being cut off when performing boxpot.stats on all data
+## need some starting points that are off the scale big and small to allow them to be updated by the real data!!
+lwr=1e10
+upr=0
 
-lims = c(stat[1],stat[5])
+tissues = levels(factor(temp$tissue))
+
+for(tiss in tissues){
+  
+  temp2 =
+    temp %>%
+    filter(tissue==!!tiss)
+  
+  
+  stat = boxplot.stats(temp2$contacts)$stats
+  
+  lwr_tmp = stat[1]
+  upr_tmp = stat[5]
+  
+  ## update these values in the loop if smaller or bigger
+  if(lwr_tmp<lwr){lwr=lwr_tmp}
+  if(upr_tmp>upr){upr=upr_tmp}
+  
+}
+
+
+lims=c(lwr,upr*1.1)
 
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts,fill=tissue))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-.5,aes(y=upr))+
   coord_cartesian(ylim = lims)+
   facet_wrap(~promName)+
   scale_fill_manual(values=c("#7570b3ff", "#d95f02ff", "#1b9e77ff"))+
@@ -609,17 +641,48 @@ ggsave(p,
        height=1.25)
 
 
+
+
+## PLOT 2 ##
+
 ## E-P interactions split by promoter for Mes and CD41
 
 temp = 
   totals %>%
   filter(genotype=="WT" & (tissue=="Flk1" | tissue=="CD41"))
 
+
 ## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
-stat = boxplot.stats(temp$contacts)$stats
+## needs to be done for each group in this case as upper whisker was being cut off when performing boxpot.stats on all data
+## need some starting points that are off the scale big and small to allow them to be updated by the real data!!
+lwr=1e10
+upr=0
 
-lims = c(stat[1],stat[5])
+for(tiss in tissues){
+  for(p in proms){
+      
+    temp2 =
+      temp %>%
+      filter(tissue==!!tiss &
+              promName==!!p)
+  
+    
+    stat = boxplot.stats(temp2$contacts)$stats
+    
+    lwr_tmp = stat[1]
+    upr_tmp = stat[5]
+    
+    ## update these values in the loop if smaller or bigger
+    if(lwr_tmp<lwr){lwr=lwr_tmp}
+    if(upr_tmp>upr){upr=upr_tmp}
+      
+
+  }
+}
+
+
+lims=c(lwr,upr*1.1)
 
 
 
@@ -627,6 +690,7 @@ lims = c(stat[1],stat[5])
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts,fill=tissue))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-.5,aes(y=upr))+
   coord_cartesian(ylim = lims)+
   facet_wrap(~promName)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
@@ -646,29 +710,55 @@ ggsave(p,
 
 
 
+## PLOT 3 ##
+
 ## total E-P interactions split by promoter for all tissues and genotypes
-temp = 
-  totals# %>%
-#filter(tissue=="Flk1" | tissue=="CD41")
-
-
 
 ## need to identify which points are considered outliers by a standard boxplot and set the limits to that value
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
-stat = boxplot.stats(temp$contacts)$stats
+## needs to be done for each group in this case as upper whisker was being cut off when performing boxpot.stats on all data
+## need some starting points that are off the scale big and small to allow them to be updated by the real data!!
+lwr=1e10
+upr=0
 
-lims = c(stat[1],stat[5])
+for(g in genotypes){
+  for(tiss in tissues){
+    for(p in proms){
+      
+      temp =
+        totals %>%
+        filter(genotype==!!g &
+                 tissue==!!tiss &
+                 promName==!!p)
+      
+      
+      stat = boxplot.stats(temp$contacts)$stats
+      
+      lwr_tmp = stat[1]
+      upr_tmp = stat[5]
+      
+      ## update these values in the loop if smaller or bigger
+      if(lwr_tmp<lwr){lwr=lwr_tmp}
+      if(upr_tmp>upr){upr=upr_tmp}
+      
+    }
+  }
+}
 
+
+lims=c(lwr,upr*1.1)
 
 p=
-  ggplot(data=temp, aes(x = genotype, y = contacts, fill=genotype))+
+  ggplot(data=totals, aes(x = genotype, y = contacts, fill=genotype))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-1,aes(y=upr))+
   coord_cartesian(ylim = lims)+
   facet_wrap(promName~tissue, ncol=6)+
   scale_fill_manual(values=c("#666666ff", "#66a61eff", "#e7298aff"))+
   theme_bw()+
   theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white",size=.1),
+        strip.background =element_blank(),
+        strip.text.x = element_text(margin = margin(0,0,0,0, "cm")),
         axis.ticks = element_line(size=.1),
         axis.ticks.x = element_blank(),
         panel.grid = element_blank(),
@@ -682,36 +772,41 @@ ggsave(p,
 
 
 
-## all enhancers big plot by tissue
+## all enhancers big plot across genotypes, split up by tissueplotting in a list with patchwork
+plot_list = list()
+for(tiss in tissues){
+  
+  temp =
+    totals %>%
+    filter(tissue == !!tiss)
+  
+  
+  plot_list[[tiss]]=
+    ggplot(data=totals, aes(x = genotype, y = contacts, fill=genotype))+
+    geom_boxplot(size=.1,outlier.size=.3)+
+    stat_summary(fun.data = n_fun, geom = "text",color="white",size=1.5)+
+    facet_wrap(~promName+enh_numName, scales="free", ncol=9)+
+    ggtitle(tiss)+
+    scale_fill_manual(values=c("#666666ff", "#66a61eff", "#e7298aff"))+
+    ylab("Normalized interaction")+
+    theme_bw()+
+    theme(strip.text.x = element_text(size = 6,margin = margin(0,0,0,0, "cm")),
+          axis.text = element_text(size=6),
+          axis.text.x=element_blank(),
+          strip.background =element_blank(),
+          axis.ticks = element_line(size=.1),
+          axis.ticks.x = element_blank(),
+          panel.grid = element_blank(),
+          panel.border = element_rect(colour = "black", fill=NA, size=.1))
+  
+}
 
-p=
-  ggplot(data=totals, aes(x = genotype, y = contacts, fill=genotype))+
-  stat_summary(geom="bar",
-               fun = median)+
-  geom_point(alpha=1,size=.3)+
-  stat_summary(geom="uperrorbar",
-               mapping = aes(x = genotype, y = contacts),
-               fun.min = iqr_low,
-               fun.max = iqr_hi,
-               fun = median,
-               width=.3,
-               size=.1)+
-  facet_wrap(promName~tissue+enh_numName, scales="free", ncol=13)+
-  scale_fill_manual(values=c("#666666ff", "#66a61eff", "#e7298aff"))+
-  theme_bw()+
-  theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white"),
-        strip.text.x = element_text(size = 6),
-        axis.text = element_text(size=6))+
-  theme(axis.text.x=element_blank(),
-        strip.background =element_rect(fill="white",size=.1),
-        axis.ticks = element_line(size=.1),
-        axis.ticks.x = element_blank(),
-        panel.grid = element_blank(),
-        panel.border = element_rect(colour = "black", fill=NA, size=.1))
-
+p = wrap_plots(plot_list) +
+  plot_layout(guides="collect",ncol=1) +
+  plot_annotation(title = "Individual Enhancer-Promoter Interactions",
+                  theme = theme(plot.title = element_text(size = 12)))
 
 ggsave(p, 
        filename = paste0(outFolder, "allTissues_allGenotypes_allEnhancers_median_IQR.pdf"),
-       width=13,
-       height=17)
+       width=9,
+       height=13)

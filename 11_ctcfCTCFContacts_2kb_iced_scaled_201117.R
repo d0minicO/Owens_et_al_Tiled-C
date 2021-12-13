@@ -14,11 +14,11 @@ library(ggpubr)
 #### taking iced and scaled interaction matrices calculated by Marieke's script 
 # from individual samples
 
-# calculating CTCF CTCF contacts (v2 is just for TAD boundaries) in different groups (with replicate info as SD)
+# calculating CTCF CTCF contacts just for TAD boundaries in different groups (with replicate info as SD)
 
 
-# working 18 11 2020
-
+# created 18 11 2020
+# last updated 12 12 2021
 
 ###############
 ### OPTIONS ###
@@ -52,6 +52,13 @@ head_tail <- function(x,description){
         rep("",ncol(x))) %>%
     tibble
   
+}
+
+
+## function from https://stackoverflow.com/questions/15720545/use-stat-summary-to-annotate-plot-with-number-of-observations
+## to add text of number of data points ontop of a boxplot 
+n_fun <- function(x){
+  return(data.frame(y = median(x), label = paste0(length(x))))
 }
 
 ##############
@@ -388,7 +395,6 @@ write.table(ph1,
 
 
 
-
 #################################
 ########### PLOTTING ############
 #################################
@@ -422,7 +428,7 @@ temp %>%
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
 stat = boxplot.stats(temp$contacts)$stats
 
-lims = c(stat[1],stat[5])
+lims = c(stat[1],stat[5]*1.1)
 
 
 
@@ -430,6 +436,7 @@ lims = c(stat[1],stat[5])
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts, fill=tissue))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-1,aes(y=stat[5]))+
   coord_cartesian(ylim = lims)+
   scale_fill_manual(values=c("#7570b3ff", "#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
@@ -473,13 +480,15 @@ temp %>%
 # values returned are lower whisker, lower hinge, median, upper hinge, and upper whisker
 stat = boxplot.stats(temp$contacts)$stats
 
-lims = c(stat[1],stat[5])
+lims = c(stat[1],stat[5]*1.1)
+
 
 
 
 p=
   ggplot(data=temp, aes(x = tissue, y = contacts, fill=tissue))+
   geom_boxplot(size=.1,outlier.shape = NA)+
+  stat_summary(fun.data = n_fun, geom = "text",color="black",size=1.5,vjust=-1,aes(y=stat[5]))+
   coord_cartesian(ylim = lims)+
   scale_fill_manual(values=c("#d95f02ff", "#1b9e77ff"))+
   theme_bw()+
@@ -492,7 +501,7 @@ p=
 
 ggsave(p, 
        filename = paste0(outFolder, "Mes_HPC_WT_CTCF-TAD-boundaries_median_IQR.pdf"),
-       width=1.7,
-       height=.8)
+       width=1.8,
+       height=1)
 
 
