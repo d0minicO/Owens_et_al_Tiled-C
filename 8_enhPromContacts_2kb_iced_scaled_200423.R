@@ -772,7 +772,7 @@ ggsave(p,
 
 
 
-## all enhancers big plot across genotypes, split up by tissueplotting in a list with patchwork
+## all enhancers big plot across genotypes, split up by tissue, plotting in a list with patchwork
 plot_list = list()
 for(tiss in tissues){
   
@@ -810,3 +810,12 @@ ggsave(p,
        filename = paste0(outFolder, "allTissues_allGenotypes_allEnhancers_median_IQR.pdf"),
        width=9,
        height=13)
+
+
+
+# quick check to show that the number of bins quantified is either the n number,
+# or 2n when an enhancer spreads across 2 bins
+totals %>%
+  filter(tissue=="Un") %>%
+  filter(enh_numName=="-41.9") %>%
+  filter(genotype=="WT")
