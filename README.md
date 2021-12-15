@@ -1,4 +1,7 @@
 # Analysis of Tiled-C data
+
+[![DOI](https://zenodo.org/badge/393514046.svg)](https://zenodo.org/badge/latestdoi/393514046)
+
 Instructions and custom scripts for anlaysis of Tiled-C data in our biorXiv paper here:
 
 https://www.biorxiv.org/content/10.1101/2021.05.14.444178v1
