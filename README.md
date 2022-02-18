@@ -2,9 +2,9 @@
 
 [![DOI](https://zenodo.org/badge/393514046.svg)](https://zenodo.org/badge/latestdoi/393514046)
 
-Instructions and custom scripts for anlaysis of Tiled-C data in our biorXiv paper here:
+Instructions and custom scripts for anlaysis of Tiled-C data in our Nature Communications paper here:
 
-https://www.biorxiv.org/content/10.1101/2021.05.14.444178v1
+https://www.nature.com/articles/s41467-022-28376-8
 
 Details are available in the methods section of the paper. Any questions that arise should be directed to dominic.owens@utoronto.ca
 
